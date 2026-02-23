@@ -22,3 +22,9 @@ class Artwork(Base):
     image_filename: Mapped[str] = mapped_column(String(300), nullable=False)
 
     comments: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    @property
+    def image_url(self) -> str:
+        if not self.image_filename:
+            return ""
+        return f"/static/uploads/{self.image_filename}"
