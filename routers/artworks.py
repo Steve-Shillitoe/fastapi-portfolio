@@ -118,6 +118,9 @@ async def get_artwork(
     return artwork
 
 
+UPLOAD_DIR = "static/uploads"
+
+
 @router.delete(
     "/{artwork_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -127,7 +130,7 @@ async def delete_artwork(
     db: AsyncSession = Depends(get_db),
 ) -> None:
     """
-    Delete an artwork by ID.
+    Delete an artwork and its associated image file.
     """
 
     result = await db.execute(
@@ -141,5 +144,15 @@ async def delete_artwork(
             detail="Artwork not found",
         )
 
+    # Build file path
+    file_path = os.path.join(UPLOAD_DIR, artwork.image_filename)
+
+    try:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+    except Exception as e:
+        print(f"Error deleting file: {e}")
+
+    # Delete database record
     await db.delete(artwork)
     await db.commit()
