@@ -9,7 +9,7 @@ and the persistence layer.
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +17,10 @@ from database.database import get_db
 from models.artwork import Artwork
 from schemas.artwork_schema import ArtworkCreate, ArtworkResponse
 
+import os
+import uuid
+
+UPLOAD_DIR = "static/uploads"
 
 router = APIRouter(
     prefix="/artworks",
@@ -30,20 +34,38 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_artwork(
-    artwork: ArtworkCreate,
+    title: str = Form(...),
+    comments: str | None = Form(None),
+    image: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ) -> ArtworkResponse:
     """
-    Create a new artwork record.
-
-    Accepts validated input data via ArtworkCreate schema,
-    persists it to the database, and returns the stored record.
+    Create a new artwork with image upload.
     """
 
+    # Validate file type
+    if image.content_type not in ["image/jpeg", "image/png", "image/webp"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid image type. Only JPEG, PNG, WEBP allowed.",
+        )
+
+    # Generate safe unique filename to prevent filename collisions and ensure security
+    file_extension = image.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+
+    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+    # Save file to disk
+    with open(file_path, "wb") as buffer:
+        content = await image.read()
+        buffer.write(content)
+
+    # Save record in database
     db_artwork = Artwork(
-        title=artwork.title,
-        comments=artwork.comments,
-        image_filename="placeholder.jpg",  # Will be replaced when upload is implemented
+        title=title,
+        comments=comments,
+        image_filename=unique_filename,
     )
 
     db.add(db_artwork)
