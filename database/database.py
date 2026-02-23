@@ -13,8 +13,11 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-
-load_dotenv()
+ # Load environment variables from .env file, allowing overrides for development and testing.
+ # This ensures that the DATABASE_URL can be set in the .env file and will be used by the application.
+ # The override=True parameter allows environment variables to be overridden by those in the .env file,
+ # which is useful for development and testing environments.
+load_dotenv(override=True) 
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -50,6 +53,9 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
 
+
+# IMPORTANT: import models so SQLAlchemy knows about them
+import models.artwork
 
 async def init_db() -> None:
     """
