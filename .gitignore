@@ -25,3 +25,6 @@ venv/
 
 # Logs
 *.log
+
+# Do not add image files to gitHub
+static/uploads/*
