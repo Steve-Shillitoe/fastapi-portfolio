@@ -1,10 +1,12 @@
 """
-Database ORM models for the art portfolio application.
+Artwork ORM model using SQLAlchemy 2.x style mappings.
 """
 
-from sqlalchemy import Column, Integer, String, Text
-from database import Base
-from fastapi import settings
+from typing import Optional
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, Text
+from database.database import Base
+
 
 class Artwork(Base):
     """
@@ -13,17 +15,10 @@ class Artwork(Base):
 
     __tablename__ = "artworks"
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(200), nullable=False)
-    image_filename = Column(String(300), nullable=False)
-    comments = Column(Text, nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
-    @property
-    def image_path(self) -> str:
-        """
-        Returns the public URL path to the artwork image.
-        """
-        if self.image_filename:
-            return f"/static/uploads/{self.image_filename}"
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
 
-        return "/static/uploads/default.png"
+    image_filename: Mapped[str] = mapped_column(String(300), nullable=False)
+
+    comments: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
