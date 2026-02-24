@@ -7,6 +7,7 @@ It acts as the API layer between client requests
 and the persistence layer.
 """
 
+from email.mime import image
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
@@ -19,13 +20,32 @@ from schemas.artwork_schema import ArtworkCreate, ArtworkResponse
 
 import os
 import uuid
-
-UPLOAD_DIR = "static/uploads"
+from PIL import Image
+import io
 
 router = APIRouter(
     prefix="/artworks",
     tags=["Artworks"],
 )
+
+
+UPLOAD_DIR = "static/uploads"
+MAX_SIZE = (800, 800)  # Max width/height
+
+
+async def save_resized_image(image: UploadFile, filename: str) -> str:
+    contents = await image.read()
+
+    img = Image.open(io.BytesIO(contents))
+
+    # Maintain aspect ratio
+    img.thumbnail(MAX_SIZE)
+
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    img.save(file_path)
+
+    return filename
 
 
 @router.post(
@@ -54,12 +74,8 @@ async def create_artwork(
     file_extension = image.filename.split(".")[-1]
     unique_filename = f"{uuid.uuid4()}.{file_extension}"
 
-    file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
     # Save file to disk
-    with open(file_path, "wb") as buffer:
-        content = await image.read()
-        buffer.write(content)
+    await save_resized_image(image, unique_filename)
 
     # Save record in database
     db_artwork = Artwork(
