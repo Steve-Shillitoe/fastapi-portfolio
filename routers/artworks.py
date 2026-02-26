@@ -23,6 +23,13 @@ import uuid
 from PIL import Image
 import io
 
+from fastapi import Request
+from fastapi.responses import HTMLResponse
+
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates(directory="templates")
+
 router = APIRouter(
     prefix="/artworks",
     tags=["Artworks"],
@@ -112,6 +119,21 @@ async def list_artworks(
     "/{artwork_id}",
     response_model=ArtworkResponse,
 )
+
+
+@router.get("/gallery", response_class=HTMLResponse)
+async def gallery(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Artwork))
+    artworks = result.scalars().all()
+
+    return templates.TemplateResponse(
+        "gallery.html",
+        {"request": request, "artworks": artworks},
+    )
+
 async def get_artwork(
     artwork_id: int,
     db: AsyncSession = Depends(get_db),
