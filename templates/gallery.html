@@ -44,6 +44,18 @@
         </div>
     {% endfor %}
 </div>
+<div style="text-align:center; margin: 20px;">
+    {% if page > 1 %}
+        <a href="/?page={{ page - 1 }}">⬅ Previous</a>
+    {% endif %}
 
+    <span style="margin: 0 15px;">
+        Page {{ page }} of {{ total_pages }}
+    </span>
+
+    {% if page < total_pages %}
+        <a href="/?page={{ page + 1 }}">Next ➡</a>
+    {% endif %}
+</div>
 </body>
 </html>
