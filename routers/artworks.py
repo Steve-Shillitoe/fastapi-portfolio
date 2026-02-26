@@ -10,7 +10,7 @@ and the persistence layer.
 from email.mime import image
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,6 +53,14 @@ async def save_resized_image(image: UploadFile, filename: str) -> str:
     img.save(file_path)
 
     return filename
+
+
+@router.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request):
+    return templates.TemplateResponse(
+        "admin.html",
+        {"request": request},
+    )
 
 
 @router.post(
