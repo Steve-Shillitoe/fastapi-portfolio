@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Art Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        img {
+            width: 100%;
+            border-radius: 5px;
+        }
+        h3 {
+            margin: 10px 0 5px;
+        }
+        p {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="text-align:center;">My Art Portfolio</h1>
+
+<div class="gallery">
+    {% for art in artworks %}
+        <div class="card">
+            <img src="{{ art.image_url }}" alt="{{ art.title }}">
+            <h3>{{ art.title }}</h3>
+            <p>{{ art.comments }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>
