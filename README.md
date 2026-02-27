@@ -22,7 +22,7 @@ The system functions as an **art portfolio management platform** supporting:
 - Pagination
 
 - Image storage and processing
-  !(./AnimatedGif/animatedGif.gif)
+ 
 ## System Architecture
 
 The project follows a **layered architecture pattern**:
@@ -379,4 +379,5 @@ This project demonstrates competency in:
 - Frontend/backend integration
 
 - Performance-aware web design
+
 
