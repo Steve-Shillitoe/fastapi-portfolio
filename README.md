@@ -22,3 +22,27 @@ The system functions as an **art portfolio management platform** supporting:
 - Pagination
 
 - Image storage and processing
+  
+## System Architecture
+
+The project follows a **layered architecture pattern**:
+
+```
+Presentation Layer
+├── Jinja2 Templates
+├── JavaScript Fetch API
+
+Application Layer
+├── Routers (API endpoints)
+├── Services (business logic)
+
+Domain Layer
+├── SQLAlchemy ORM models
+├── Pydantic schemas
+
+Infrastructure Layer
+├── PostgreSQL database
+├── Async SQLAlchemy engine
+├── File system storage for images
+```
+
