@@ -10,7 +10,7 @@ from sqlalchemy import select, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.database import get_db
 from models.artwork import Artwork
-
+import models
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -2,8 +2,8 @@ from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database.database import Base
 from typing import List,  TYPE_CHECKING
-if TYPE_CHECKING:
-    from models.artwork import Artwork
+#if TYPE_CHECKING:
+ #   from models.artwork import Artwork
 
 artwork_tags = Table(
     "artwork_tags",
