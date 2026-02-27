@@ -79,3 +79,56 @@ Key design goals:
 - PostgreSQL relational database
 
 - File system storage for images
+## Database Design
+### Core Entities
+#### Artwork
+
+Represents an uploaded artwork.
+
+Fields:
+
+- id (Primary Key)
+
+- title
+
+- image_filename
+
+- comments
+
+Relationships:
+
+- Many-to-many relationship with Tags
+
+### Tag
+
+Represents searchable metadata.
+
+Fields:
+
+- id
+
+- name
+
+Relationships:
+
+- Many-to-many relationship with Artwork
+
+## Many-to-Many Relationship Model
+
+Implemented using an association table:
+
+```
+artwork_tags = Table(
+    "artwork_tags",
+    Base.metadata,
+    Column("artwork_id", ForeignKey("artworks.id")),
+    Column("tag_id", ForeignKey("tags.id")),
+)
+```
+This allows:
+
+- Flexible tagging
+
+- Efficient search filtering
+
+- Normalized database structure
