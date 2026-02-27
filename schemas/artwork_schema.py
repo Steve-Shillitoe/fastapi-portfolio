@@ -28,3 +28,9 @@ class ArtworkResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ArtworkUpdate(BaseModel):
+    title: str
+    comments: str | None = None
+    tags: str | None = None       
