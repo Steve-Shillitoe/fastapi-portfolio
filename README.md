@@ -204,4 +204,178 @@ Performance optimizations:
 
 - Reduced ORM round trips
 
-## Search Implementation
+## Image Handling
+
+Uploaded images are:
+
+- Resized using Pillow
+
+- Stored in filesystem storage
+
+Database only stores:
+
+- image_filename
+
+This avoids:
+
+- Database blob storage overhead
+
+- Improves scalability
+
+Image paths are dynamically generated via model properties.
+
+## Frontend Interaction Model
+
+The frontend uses:
+
+- Jinja2 server rendering
+
+- JavaScript event listeners
+
+- Fetch API for updates
+
+- Data is passed to JavaScript using JSON serialization:
+```
+data-artwork='{{ artwork | tojson | safe }}'
+```
+This prevents template injection vulnerabilities.
+
+## Pagination Strategy
+
+Pagination is implemented using SQL-level limits:
+
+```
+.offset((page - 1) * PAGE_SIZE)
+.limit(PAGE_SIZE)
+```
+
+Advantages:
+
+- Reduces memory usage
+
+- Improves response performance
+
+## Security Considerations
+### Template Security
+
+Uses ```|tojson``` filtering to prevent JavaScript injection.
+
+### Database Safety
+
+- Parameterized ORM queries
+
+- No raw SQL string interpolation
+
+### Environment Configuration
+
+Sensitive values are stored in:
+```
+.env
+```
+Loaded using python-dotenv.
+
+## Performance Considerations
+
+Optimizations applied:
+
+- Async database IO
+
+- Lazy loading of relationships
+
+- Reduced ORM query duplication
+
+- Server-side pagination
+
+## Code Organization
+```
+database/
+models/
+routers/
+schemas/
+services/
+templates/
+static/
+```
+This follows Python backend best practices.
+
+## Running Locally
+Install dependencies
+
+Using uv:
+```
+uv venv
+uv sync
+```
+## Configure Environment
+Create ```.env:```
+```
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/artportfolio
+```
+## Start Application
+```
+uv run uvicorn main:app --reload
+```
+Access:
+```
+http://127.0.0.1:8000
+```
+
+## Potential Future Improvements
+
+Possible extensions include:
+
+### Backend
+
+- Full-text search indexing
+
+- Authentication and authorization
+
+- Redis caching layer
+
+- Graph-based tag search ranking
+
+### Frontend
+
+- SPA-style dynamic updates
+
+- Drag and drop uploads
+
+### Infrastructure
+
+- Containerized deployment (Docker)
+
+- Cloud storage integration
+
+## Key Engineering Principles Demonstrated
+
+- Separation of concerns
+
+- Asynchronous request handling
+
+- Relational database normalization
+
+- Secure templating
+
+- Service-oriented backend design
+
+## Author Notes
+
+This project demonstrates practical experience with:
+
+- Modern Python web architecture
+
+- Async database programming
+
+- Full-stack integration patterns
+
+## Portfolio Value
+
+This project demonstrates competency in:
+
+- Backend API design
+
+- Database modeling
+
+- Frontend/backend integration
+
+- Performance-aware web design
