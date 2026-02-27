@@ -6,13 +6,14 @@ handling artwork-related operations (CRUD).
 It acts as the API layer between client requests
 and the persistence layer.
 """
-
 from email.mime import image
 from typing import List
-
+from services.tag_service import process_tags_fast
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from models.tag import Tag
 
 from database.database import get_db
 from models.artwork import Artwork
@@ -68,9 +69,12 @@ async def admin_page(request: Request):
     response_model=ArtworkResponse,
     status_code=status.HTTP_201_CREATED,
 )
+
+
 async def create_artwork(
     title: str = Form(...),
     comments: str | None = Form(None),
+    tags: str = Form(None),
     image: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ) -> ArtworkResponse:
@@ -91,11 +95,12 @@ async def create_artwork(
 
     # Save file to disk
     await save_resized_image(image, unique_filename)
-
+    
     # Save record in database
     db_artwork = Artwork(
         title=title,
         comments=comments,
+        tags = await process_tags_fast(db, tags),
         image_filename=unique_filename,
     )
 
