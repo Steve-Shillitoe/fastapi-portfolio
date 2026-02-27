@@ -45,4 +45,37 @@ Infrastructure Layer
 ├── Async SQLAlchemy engine
 ├── File system storage for images
 ```
+Key design goals:
 
+- Separation of concerns
+
+- Testability
+
+- Maintainability
+
+- Async scalability
+
+## Technology Stack
+### Backend
+
+- FastAPI
+
+- Python 3.11+
+
+- SQLAlchemy 2.x (Async ORM)
+
+- Asyncpg PostgreSQL driver
+
+### Frontend
+
+- Jinja2 templating
+
+- Bootstrap UI components
+
+- Vanilla JavaScript Fetch API
+
+### Storage
+
+- PostgreSQL relational database
+
+- File system storage for images
