@@ -132,3 +132,76 @@ This allows:
 - Efficient search filtering
 
 - Normalized database structure
+
+
+## Async Database Layer
+
+The application uses SQLAlchemy 2.x async patterns:
+
+### Engine Configuration
+```
+engine = create_async_engine(DATABASE_URL, echo=True)
+Session Factory
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
+    expire_on_commit=False,
+)
+```
+Key design decisions:
+
+- expire_on_commit=False prevents unnecessary database refresh queries.
+
+- Async sessions improve request concurrency.
+
+## Dependency Injection
+FastAPI dependency injection is used for request-scoped database sessions:
+```
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        yield session
+```
+Benefits:
+
+- Prevents session leakage
+
+- Ensures proper cleanup
+
+- Supports concurrent request handling
+
+## Service Layer Pattern
+
+Business logic is isolated inside service modules.
+
+Example:
+
+Tag processing logic is centralized in:
+```
+services/tag_service.py
+```
+This prevents:
+
+- Router logic bloat
+
+- Code duplication
+
+- Tight coupling between presentation and domain layers
+
+## Tag Processing
+
+Tags are processed using:
+
+- Normalization (lowercase + trimming)
+
+- Database lookup
+
+- Conditional creation of missing tags
+
+- Relationship assignment
+
+Performance optimizations:
+
+- Single request database lookups
+
+- Reduced ORM round trips
+
+## Search Implementation
