@@ -9,12 +9,12 @@ and the persistence layer.
 from email.mime import image
 from typing import List
 from services.tag_service import process_tags_fast
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, UploadFile
-from sqlalchemy import select
+from fastapi import (APIRouter, Depends, HTTPException, 
+                     status, UploadFile, File, Form, UploadFile, Query, Request)
+from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.tag import Tag
-
 from database.database import get_db
 from models.artwork import Artwork
 from schemas.artwork_schema import ArtworkCreate, ArtworkResponse
@@ -23,10 +23,7 @@ import os
 import uuid
 from PIL import Image
 import io
-
-from fastapi import Request
 from fastapi.responses import HTMLResponse
-
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="templates")
@@ -134,39 +131,34 @@ async def list_artworks(
 )
 
 
-@router.get("/gallery", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def gallery(
     request: Request,
+    tag: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(Artwork))
-    artworks = result.scalars().all()
+    # Base query
+    query = select(Artwork).order_by(desc(Artwork.id))
+
+    # If tag search is provided
+    if tag:
+        query = (
+            query
+            .join(Artwork.tags)
+            .where(Tag.name.ilike(f"%{tag.lower()}%"))
+        )
+
+    result = await db.execute(query)
+    artworks = result.scalars().unique().all()
 
     return templates.TemplateResponse(
         "gallery.html",
-        {"request": request, "artworks": artworks},
+        {
+            "request": request,
+            "artworks": artworks,
+            "tag": tag,
+        },
     )
-
-async def get_artwork(
-    artwork_id: int,
-    db: AsyncSession = Depends(get_db),
-) -> ArtworkResponse:
-    """
-    Retrieve a single artwork by its ID.
-    """
-
-    result = await db.execute(
-        select(Artwork).where(Artwork.id == artwork_id)
-    )
-    artwork = result.scalars().first()
-
-    if artwork is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Artwork not found",
-        )
-
-    return artwork
 
 
 UPLOAD_DIR = "static/uploads"

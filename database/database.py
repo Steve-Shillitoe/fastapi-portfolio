@@ -54,9 +54,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-# IMPORTANT: import models so SQLAlchemy knows about them
-import models.artwork
-
 async def init_db() -> None:
     """
     Create database tables.

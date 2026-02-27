@@ -10,7 +10,9 @@ from sqlalchemy import select, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.database import get_db
 from models.artwork import Artwork
+from models.tag import Tag
 import models
+from routers.artworks import gallery
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,24 +33,42 @@ app.include_router(artworks.router)
 async def homepage(
     request: Request,
     page: int = Query(1, ge=1),
+    tag: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
     PAGE_SIZE = 3
 
-    # Count total artworks
-    count_result = await db.execute(
-        select(func.count()).select_from(Artwork)
-    )
+    # Base query
+    query = select(Artwork).order_by(desc(Artwork.id))
+    count_query = select(func.count()).select_from(Artwork)
+
+    # If tag filter exists
+    if tag:
+        query = (
+            query
+            .join(Artwork.tags)
+            .where(Tag.name.ilike(f"%{tag.lower()}%"))
+        )
+
+        count_query = (
+            select(func.count())
+            .select_from(Artwork)
+            .join(Artwork.tags)
+            .where(Tag.name.ilike(f"%{tag.lower()}%"))
+        )
+
+    # Get total count
+    count_result = await db.execute(count_query)
     total = count_result.scalar_one()
 
-    # Fetch paginated artworks
+    # Apply pagination
     result = await db.execute(
-        select(Artwork)
-        .order_by(desc(Artwork.id))
+        query
         .offset((page - 1) * PAGE_SIZE)
         .limit(PAGE_SIZE)
     )
-    artworks = result.scalars().all()
+
+    artworks = result.scalars().unique().all()
 
     total_pages = (total + PAGE_SIZE - 1) // PAGE_SIZE
 
@@ -59,5 +79,6 @@ async def homepage(
             "artworks": artworks,
             "page": page,
             "total_pages": total_pages,
+            "tag": tag,
         },
     )

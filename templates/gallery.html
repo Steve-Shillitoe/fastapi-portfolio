@@ -44,7 +44,27 @@
 <body>
 
 <h1 style="text-align:center;">My Art Portfolio</h1>
+<form method="get"  action="/"  style="text-align:center; margin-bottom:30px;">
 
+    <input
+        type="text"
+        name="tag"
+        placeholder="Search by tag..."
+        value="{{ tag or '' }}"
+        style="padding:8px; width:250px;"
+    >
+
+    <button type="submit" style="padding:8px 15px;">
+        Search
+    </button>
+
+    {% if tag %}
+        <a href="/artworks/gallery" style="margin-left:15px;">
+            Clear
+        </a>
+    {% endif %}
+
+</form>
 <div class="gallery">
     {% for art in artworks %}
         <div class="card">
