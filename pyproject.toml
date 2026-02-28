@@ -23,6 +23,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pylint>=4.0.5",
+    "pytest-cov>=7.0.0",
 ]
 
 [tool.pylint.main]
@@ -36,3 +37,11 @@ disable = [
 
 [tool.pylint.format]
 max-line-length = 100
+
+[tool.pytest.ini_options]
+addopts = """
+--cov=.
+--cov-report=term-missing
+--cov-fail-under=70
+"""
+testpaths = ["tests"]
