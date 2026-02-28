@@ -125,12 +125,6 @@ async def list_artworks(
     return artworks
 
 
-@router.get(
-    "/{artwork_id}",
-    response_model=ArtworkResponse,
-)
-
-
 @router.get("/", response_class=HTMLResponse)
 async def gallery(
     request: Request,

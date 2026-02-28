@@ -25,7 +25,7 @@ class ArtworkResponse(BaseModel):
     image_filename: str
     comments: Optional[str]
     image_url: str
-
+    tags: list[str]
     class Config:
         from_attributes = True
 
