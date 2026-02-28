@@ -1,9 +1,8 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, Query
 from routers import artworks
 from database.database import init_db
-from fastapi.staticfiles import StaticFiles
-from fastapi import Request, Query
+from fastapi.staticfiles import StaticFiles 
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, desc, func
@@ -12,7 +11,6 @@ from database.database import get_db
 from models.artwork import Artwork
 from models.tag import Tag
 import models
-from routers.artworks import gallery
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,7 +18,6 @@ async def lifespan(app: FastAPI):
     await init_db()
     yield
     # Shutdown logic (optional cleanup)
-
 
 app = FastAPI(lifespan=lifespan)
 
