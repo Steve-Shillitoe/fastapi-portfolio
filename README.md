@@ -342,11 +342,11 @@ Possible extensions include:
 
 - Drag and drop uploads
 
-### Infrastructure
-
-- Containerized deployment (Docker)
-
-- Cloud storage integration
+## Unit Tests & Continuous Integration
+The application is supported by automated unit tests using **pytest**, with coverage reporting 
+and enforcement to maintain quality standards. A **GitHub Actions workflow** runs the test suite 
+on every commit and pull request, ensuring consistent validation in a clean CI environment 
+and preventing coverage from dropping below the defined threshold.
 
 ## Key Engineering Principles Demonstrated
 
@@ -381,6 +381,7 @@ This project demonstrates competency in:
 - Frontend/backend integration
 
 - Performance-aware web design
+
 
 
 
