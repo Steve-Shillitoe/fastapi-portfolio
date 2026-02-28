@@ -8,17 +8,17 @@ and the persistence layer.
 """
 from email.mime import image
 from typing import List
+from unittest import result
 from services.tag_service import process_tags_fast
 from fastapi import (APIRouter, Depends, HTTPException, 
                      status, UploadFile, File, Form, UploadFile, Query, Request)
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.orm import selectinload
 from models.tag import Tag
 from database.database import get_db
 from models.artwork import Artwork
 from schemas.artwork_schema import ArtworkCreate, ArtworkResponse
-
 import os
 import uuid
 from PIL import Image
@@ -66,9 +66,8 @@ async def admin_page(request: Request):
     response_model=ArtworkResponse,
     status_code=status.HTTP_201_CREATED,
 )
-
-
 async def create_artwork(
+    request: Request,
     title: str = Form(...),
     comments: str | None = Form(None),
     tags: str = Form(None),
@@ -103,9 +102,24 @@ async def create_artwork(
 
     db.add(db_artwork)
     await db.commit()
-    await db.refresh(db_artwork)
 
-    return db_artwork
+    result = await db.execute(
+    select(Artwork)
+    .options(selectinload(Artwork.tags))
+    .where(Artwork.id == db_artwork.id))
+
+    db_artwork = result.scalars().first()
+   
+    return ArtworkResponse(
+        id=db_artwork.id,
+        title=db_artwork.title,
+        comments=db_artwork.comments,
+        image_filename=db_artwork.image_filename,
+        image_url = str(request.base_url) + 
+                f"static/uploads/{db_artwork.image_filename}",
+        tags=[tag.name for tag in db_artwork.tags],
+    )
+
 
 
 @router.get(
@@ -157,39 +171,26 @@ async def gallery(
 
 UPLOAD_DIR = "static/uploads"
 
-
-@router.delete(
-    "/{artwork_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
+@router.delete("/{artwork_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_artwork(
     artwork_id: int,
     db: AsyncSession = Depends(get_db),
-) -> None:
-    """
-    Delete an artwork and its associated image file.
-    """
-
+):
     result = await db.execute(
         select(Artwork).where(Artwork.id == artwork_id)
     )
+
     artwork = result.scalars().first()
 
-    if artwork is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Artwork not found",
-        )
+    if not artwork:
+        raise HTTPException(404)
 
-    # Build file path
     file_path = os.path.join(UPLOAD_DIR, artwork.image_filename)
 
-    try:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-    except Exception as e:
-        print(f"Error deleting file: {e}")
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
-    # Delete database record
     await db.delete(artwork)
     await db.commit()
+
+    return None

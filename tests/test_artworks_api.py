@@ -57,7 +57,11 @@ async def test_delete_artwork(client: AsyncClient):
 
     create = await client.post(
         "/artworks/",
-        data={"title": "To Delete"},
+        data={
+            "title": "Test Artwork",
+            "comments": "Test comment",
+            "tags": "oil,abstract",
+        },
         files={"image": ("test.jpg", img_bytes, "image/jpeg")},
     )
 
